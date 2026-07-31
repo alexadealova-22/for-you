@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What If</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Inter:wght@400;500&display=swap');
+
+  :root{
+    --ink:#F4E9ED;
+    --ink-soft:rgba(244,233,237,0.62);
+    --paper:#150E11;
+    --accent:#F0447E;
+    --accent2:#4CC9F0;
+    --line:rgba(240,68,126,0.22);
+    --font-display:'Fraunces', serif;
+    --font-body:'Fraunces', serif;
+    --font-ui:'Inter', sans-serif;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+  }
+
+  .page{
+    max-width:600px;
+    margin:0 auto;
+    padding:120px 28px 160px;
+  }
+
+  /* opening */
+  .open .kicker{
+    font-family:var(--font-ui); font-size:12.5px; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--accent); font-weight:500;
+    margin-bottom:28px; text-shadow:0 0 18px rgba(240,68,126,0.35);
+  }
+  h1{
+    font-family:var(--font-display); font-weight:500; font-style:italic;
+    font-size:clamp(30px, 5.2vw, 44px); line-height:1.28; letter-spacing:-0.01em;
+    margin-bottom:34px; max-width:480px;
+  }
+  .grad{
+    background:linear-gradient(100deg, var(--accent) 15%, var(--accent2) 85%);
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent; -webkit-text-fill-color:transparent;
+  }
+
+  p{
+    font-family:var(--font-body); font-size:19px; line-height:1.85;
+    color:var(--ink-soft); max-width:490px; margin-bottom:22px;
+  }
+  p.lead::first-letter{
+    font-size:3.4em; float:left; line-height:0.85; padding-right:10px; padding-top:4px;
+    font-style:italic; color:var(--accent); font-weight:500;
+  }
+
+  p.quiet{
+    font-style:italic; color:var(--ink);
+  }
+
+  /* chapter markers, quiet and small — not a slideshow, just a place marker */
+  .chapter{
+    margin:78px 0 26px;
+    display:flex; align-items:baseline; gap:14px;
+  }
+  .chapter .roman{
+    font-family:var(--font-display); font-style:italic; font-size:15px; color:var(--accent);
+  }
+  .chapter.blue .roman{ color:var(--accent2); }
+  .chapter .title{
+    font-family:var(--font-ui); font-size:12.5px; letter-spacing:0.1em; text-transform:uppercase;
+    color:rgba(244,233,237,0.4);
+  }
+  .chapter .rule{
+    flex:1; height:1px; background:var(--line);
+  }
+
+  hr.beat{
+    border:none; width:36px; height:1px; background:var(--line);
+    margin:34px 0;
+  }
+
+  /* fade-in on scroll, subtle */
+  .reveal{
+    opacity:0; transform:translateY(10px);
+    transition:opacity .9s ease, transform .9s ease;
+  }
+  .reveal.visible{ opacity:1; transform:translateY(0); }
+
+  /* closing */
+  .closing{
+    margin-top:90px;
+    padding-top:52px;
+    border-top:1px solid var(--line);
+  }
+  .closing h2{
+    font-family:var(--font-display); font-weight:500; font-style:italic;
+    font-size:clamp(24px, 4vw, 32px); line-height:1.4; max-width:480px;
+    margin-bottom:24px; color:var(--accent);
+  }
+  .signature{
+    margin-top:46px; font-family:var(--font-display); font-style:italic; font-size:19px;
+  }
+
+  footer{
+    max-width:600px; margin:0 auto; padding:0 28px 70px;
+    font-family:var(--font-ui); font-size:13px; color:rgba(244,233,237,0.35);
+  }
+
+  @media (max-width:560px){
+    .page{ padding:80px 22px 120px; }
+    p{ font-size:17.5px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ transition:none; opacity:1; transform:none; }
+  }
+
+  /* music player */
+  .player{
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    padding:16px 20px; margin-bottom:52px;
+    border:1px solid var(--line); border-radius:16px;
+    background:rgba(240,68,126,0.08);
+  }
+  .progress{
+    order:10; flex-basis:100%; width:100%;
+    height:4px; border-radius:2px; margin-top:2px;
+    background:rgba(255,255,255,0.1); cursor:pointer; position:relative;
+  }
+  .progress-fill{
+    height:100%; width:0%; border-radius:2px;
+    background:linear-gradient(100deg, var(--accent) 0%, var(--accent2) 100%);
+    pointer-events:none;
+  }
+  .progress:hover .progress-fill{ filter:brightness(1.15); }
+  .play-btn{
+    flex-shrink:0; width:46px; height:46px; border-radius:50%;
+    border:1px solid var(--accent); background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:background .3s ease, transform .2s ease, box-shadow .3s ease;
+    padding:0;
+    box-shadow:0 0 0 rgba(240,68,126,0);
+  }
+  .play-btn:hover{ background:rgba(240,68,126,0.16); box-shadow:0 0 16px rgba(240,68,126,0.25); }
+  .play-btn:active{ transform:scale(0.94); }
+  .play-btn svg{ width:15px; height:15px; }
+  .play-btn #iconPause{ display:none; }
+
+  .player-text{ display:flex; flex-direction:column; gap:3px; }
+  .player-title{
+    font-family:var(--font-body); font-style:italic; font-weight:500;
+    font-size:15.5px; color:var(--ink); line-height:1.5;
+  }
+  .player-sub{
+    font-family:var(--font-ui); font-size:12px; letter-spacing:0.02em;
+    color:var(--ink-soft);
+  }
+
+  .player-bars{
+    display:flex; align-items:center; gap:2px; height:14px;
+    opacity:0; transition:opacity .3s ease;
+  }
+  .player.playing .player-bars{ opacity:1; }
+  .player-bars span{
+    width:2.5px; background:var(--accent); border-radius:2px;
+    animation:bar 1s ease-in-out infinite;
+  }
+  .player-bars span:nth-child(1){ height:6px; animation-delay:0s; }
+  .player-bars span:nth-child(2){ height:14px; animation-delay:.2s; }
+  .player-bars span:nth-child(3){ height:9px; animation-delay:.4s; }
+  @keyframes bar{
+    0%,100%{ transform:scaleY(0.4); }
+    50%{ transform:scaleY(1); }
+  }
+
+  @media (max-width:560px){
+    .player{ padding:14px 16px; gap:14px; }
+  }
+
+  /* volume control */
+  .player-right{
+    display:flex; align-items:center; gap:10px; margin-left:auto;
+  }
+  .vol-icon{
+    width:15px; height:15px; flex-shrink:0; opacity:0.55; cursor:pointer;
+  }
+  .vol-icon svg{ width:100%; height:100%; fill:var(--accent); }
+
+  .vol-slider{
+    -webkit-appearance:none; appearance:none;
+    width:64px; height:3px; border-radius:2px;
+    background:var(--line); outline:none; cursor:pointer;
+  }
+  .vol-slider::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:11px; height:11px; border-radius:50%;
+    background:var(--accent); cursor:pointer;
+    border:2px solid var(--paper); box-shadow:0 0 0 1px var(--accent);
+  }
+  .vol-slider::-moz-range-thumb{
+    width:11px; height:11px; border-radius:50%; border:2px solid var(--paper);
+    background:var(--accent); cursor:pointer; box-shadow:0 0 0 1px var(--accent);
+  }
+  .vol-slider::-moz-range-track{
+    background:var(--line); height:3px; border-radius:2px;
+  }
+
+  @media (max-width:560px){
+    .vol-slider{ width:46px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <section class="open">
+    <div class="kicker">something I've been meaning to say, badly</div>
+
+    <div class="player reveal" id="player">
+      <button class="play-btn" id="playBtn" aria-label="Play song">
+        <svg id="iconPlay" viewBox="0 0 16 16" fill="var(--accent)"><path d="M3 1.5v13l11-6.5-11-6.5z"/></svg>
+        <svg id="iconPause" viewBox="0 0 16 16" fill="var(--accent)"><rect x="3" y="1.5" width="3.5" height="13"/><rect x="9.5" y="1.5" width="3.5" height="13"/></svg>
+      </button>
+      <div class="player-text">
+        <div class="player-title">please play this song, i choose this song for you</div>
+        <div class="player-sub">read the thing that i wrote with this song</div>
+      </div>
+      <div class="player-bars"><span></span><span></span><span></span></div>
+      <div class="player-right">
+        <span class="vol-icon" id="volIcon">
+          <svg viewBox="0 0 16 16"><path d="M2 6v4h2.5L8 13V3L4.5 6H2z"/><path d="M10.5 5.5a3 3 0 010 5" fill="none" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </span>
+        <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.01" value="0.8">
+      </div>
+      <div class="progress" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <audio id="audio" src="First%20and%20Last.mp3" preload="none" loop></audio>
+    </div>
+
+    <h1>What if you accepted <span class="grad">my love?</span></h1>
+    <p class="reveal lead">I've rewritten this a few times already. I still don't really know how to say it right, so I'll just say it plainly. Somewhere between all the dumb jokes and you keeping up with mine, I started feeling something I didn't expect. So, what if you accepted my love? I don't know what would change. Maybe nothing. Maybe everything.</p>
+    <p class="reveal quiet">I'm sorry if I'm not a good writer. I promise I did my best writing all of this. :&gt;</p>
+
+    <p class="reveal quiet">I made this in pink and blue, because you like pink, and I love blue.</p>
+
+    <p class="reveal quiet" style="margin-top:36px; font-size:16.5px;">Emily Brontë once wrote, "whatever our souls are made of, his and mine are the same." I don't know if that's exactly it, but it's the closest thing I've found to how you make me feel.</p>
+  </section>
+
+  <div class="chapter">
+    <span class="roman">I</span>
+    <span class="title">The Question</span>
+    <span class="rule"></span>
+  </div>
+
+  <p class="reveal" style="font-weight:600; font-style:italic; font-size:24px; color:var(--accent); margin-bottom:32px;">So, what if you accepted my love?</p>
+
+  <p class="reveal">I won't suddenly become a different person. I'll still overthink sometimes. I'll still have days where I'm just tired or quiet. But one thing I won't let happen, you won't ever have to guess where my heart is.</p>
+  <p class="reveal">I know what it feels like to love someone and still feel unsure. Waiting for reassurance that never really comes. Trying to convince yourself you're enough, when you shouldn't even have to.</p>
+  <p class="reveal quiet">I don't want you to feel that. Not with me.</p>
+
+  <hr class="beat">
+
+  <p class="reveal">If one day you asked me, "am I really the only one?", I hope you wouldn't need me to answer.</p>
+  <p class="reveal quiet">I hope you'd already know, just from how I've been.</p>
+
+  <div class="chapter blue">
+    <span class="roman">II</span>
+    <span class="title">Peace</span>
+    <span class="rule"></span>
+  </div>
+
+  <p class="reveal" style="font-weight:600; font-style:italic; font-size:24px; color:var(--accent2); margin-bottom:32px;">I want to try to be someone who brings you peace.</p>
+
+  <p class="reveal">I don't want you to keep overthinking every little thing. Wondering if something changed. Reading too much into a few quiet hours, when it probably just meant someone fell asleep.</p>
+  <p class="reveal quiet">Maybe you've had enough of that. So have I.</p>
+  <p class="reveal">I just want to give you peace, not the brittle kind that flinches at silence, but the kind that finally exhales. Sleep that isn't shadowed by anyone's name but yours. Mornings that don't open with a question mark. I want that feeling to walk with you everywhere, quietly, until it stops being something you hope for and starts being something you simply know.</p>
+  <p class="reveal quiet">I want you to always feel like you're somewhere safe, a place where you don't have to carry whatever's happening outside.</p>
+
+  <hr class="beat">
+
+  <p class="reveal">That peace needs somewhere to live. I hope it could live in me. If I ever became your home, I'd take care of that feeling. Home shouldn't feel temporary. It shouldn't make you nervous every time the door opens.</p>
+  <p class="reveal quiet">Somewhere you don't have to pretend you're okay. That's who I want to be for you.</p>
+
+  <div class="chapter">
+    <span class="roman">III</span>
+    <span class="title">The Ordinary</span>
+    <span class="rule"></span>
+  </div>
+
+  <p class="reveal" style="font-weight:600; font-style:italic; font-size:24px; color:var(--accent); margin-bottom:32px;">Love is in the small, ordinary moments.</p>
+
+  <p class="reveal">Like the time I said something dumb just to mess around, "dasar freaky aping", and you didn't even blink, you just fired back "freakytiw" right away. I wasn't expecting that. I still think about it.</p>
+  <p class="reveal quiet">I don't know why, but I fall for you a little more every time you're being silly like that, same as me.</p>
+
+  <hr class="beat">
+
+  <p class="reveal">Or the time you randomly sent me a photo of yourself, no warning at all, and I just froze for a good minute before I could type anything back.</p>
+  <p class="reveal quiet">I never told you that. I'm telling you now.</p>
+
+  <hr class="beat">
+
+  <p class="reveal">Or the time you just said "aku mau ke luar dulu", the correct way, not "keluar" like almost everyone types it without thinking. You didn't even do it on purpose. I don't think I've ever noticed anyone get that right before.</p>
+  <p class="reveal quiet">And for some reason, that small thing just hit me. Like, damn, this girl actually gets that.</p>
+
+  <hr class="beat">
+
+  <p class="reveal">And I want every version of you. The tired one. The one who overthinks a text for ten minutes. The one who has it all together, and the one who clearly doesn't.</p>
+  <p class="reveal quiet">All of them deserve the same love, not just the easy one.</p>
+
+  <div class="chapter blue">
+    <span class="roman">IV</span>
+    <span class="title">Staying</span>
+    <span class="rule"></span>
+  </div>
+
+  <p class="reveal" style="font-weight:600; font-style:italic; font-size:24px; color:var(--accent2); margin-bottom:32px;">Quiet isn't the same as gone.</p>
+
+  <p class="reveal">If life ever got heavy, I wouldn't just disappear on you. Maybe I'd go quiet for a bit, need some time to sort myself out, but quiet isn't the same as gone. Even then I'd still try to say something, even if it's just "aku cuma butuh waktu sebentar." Some people only show up when things are easy. I'd rather be the kind who doesn't need things easy to stick around.</p>
+
+  <hr class="beat">
+
+  <p class="reveal">And you too, if your life ever gets heavy, just tell me. I want to be someone you can lean on, not just someone you have to be strong for. I want you to know I'd be there for you even when it's hard for both of us, not just on the easy days.</p>
+  <p class="reveal quiet">You don't have to carry things alone just because you're used to it.</p>
+
+  <hr class="beat">
+
+  <p class="reveal" style="font-weight:600; font-style:italic; font-size:19px; color:var(--accent2); margin-bottom:14px;">On trust, and how it's built.</p>
+
+  <p class="reveal">I think trust gets built mostly on the days nobody's paying attention. A good morning text when there's nothing new to report. Remembering something small you mentioned once, weeks ago, without needing a reminder.</p>
+  <p class="reveal quiet">That's the home I meant earlier, built from all those little ordinary things stacking up over time.</p>
+
+  <hr class="beat">
+
+  <p class="reveal">I hope every day you won't overthink me before I've even done anything wrong. I can't undo what you've been through before me, but I'll keep proving there's nothing to worry about with me, again and again, until fear just doesn't come up anymore, no matter what I do.</p>
+  <p class="reveal quiet">Until there's no fear left to feel.</p>
+
+  <div class="chapter">
+    <span class="roman">V</span>
+    <span class="title">The Truth</span>
+    <span class="rule"></span>
+  </div>
+
+  <p class="reveal" style="font-weight:600; font-style:italic; font-size:24px; color:var(--accent); margin-bottom:32px;">We're human, not perfect.</p>
+
+  <p class="reveal">I'd never ask you to forget what you've been through. Some of it shaped you, some of it shaped me too, and I think that's exactly why peace and home matter as much as they do to you now. I just hope it doesn't stop us from believing in something good anyway.</p>
+
+  <hr class="beat">
+
+  <p class="reveal">Maybe we'd still argue sometimes. We might say things we don't mean, get mad at each other, even hurt each other without meaning to. But I hope we'd keep talking through it, keep listening, and never let being right matter more than understanding each other.</p>
+
+  <div class="closing">
+    <hr class="beat">
+
+    <p class="reveal" style="font-weight:600; font-style:italic; font-size:24px; color:var(--accent); margin-bottom:32px;">So, what if you accepted my love?</p>
+
+    <p class="reveal">I'd spend every ordinary day making sure you feel at ease, the same way, again and again, until being loved like that just feels normal to you. Isn't that what love's supposed to feel like anyway?</p>
+
+    <p class="reveal">There isn't really a word in either language for it, so I'll just say it plainly, I love you, Aping. Not as a line I rehearsed, just what's actually there, on the good days and the hard ones, through the dumb jokes and the hours you go quiet. If you let me, I'd spend a long time proving that.</p>
+
+    <p class="reveal">I want you to know this now, not someday, if you accepted my love, you wouldn't be competing with anyone from my past. There's no spot in it you'd have to fight for.</p>
+
+    <p class="reveal" style="font-weight:600; font-style:italic; font-size:24px; color:var(--accent); margin-top:36px; margin-bottom:32px;">It was already yours, from the moment I decided to choose you, and I'll always try to choose you.</p>
+
+    <p class="reveal" style="font-weight:600; font-style:italic; font-size:26px; color:var(--accent); margin-top:44px; margin-bottom:10px;">So here it is, plainly, one more time —</p>
+    <p class="reveal grad" style="font-weight:600; font-style:italic; font-size:30px; margin-bottom:32px;">would you write the rest of this story with me?</p>
+
+    <p class="reveal quiet">And maybe this part sounds silly next to everything above, but I mean it too, I'd love to make you one of my moderators. I just like the idea of you being close to that part of my life too. :&gt;</p>
+
+    <div class="signature reveal">Alek, the person who calls you "alay" all the time</div>
+  </div>
+
+</div>
+
+<footer>This page was written for one person.</footer>
+
+<script>
+  const items = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+  items.forEach(i => io.observe(i));
+
+  const audio = document.getElementById('audio');
+  const playBtn = document.getElementById('playBtn');
+  const playerBox = document.getElementById('player');
+  const iconPlay = document.getElementById('iconPlay');
+  const iconPause = document.getElementById('iconPause');
+
+  playBtn.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play();
+      iconPlay.style.display = 'none';
+      iconPause.style.display = 'block';
+      playerBox.classList.add('playing');
+      playBtn.setAttribute('aria-label', 'Pause song');
+    } else {
+      audio.pause();
+      iconPlay.style.display = 'block';
+      iconPause.style.display = 'none';
+      playerBox.classList.remove('playing');
+      playBtn.setAttribute('aria-label', 'Play song');
+    }
+  });
+
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+    }
+  });
+
+  progressBar.addEventListener('click', (e) => {
+    if (!audio.duration) return;
+    const rect = progressBar.getBoundingClientRect();
+    const pct = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+    audio.currentTime = pct * audio.duration;
+  });
+
+  const volSlider = document.getElementById('volSlider');
+  const volIcon = document.getElementById('volIcon');
+  let lastVolume = 0.8;
+  audio.volume = 0.8;
+
+  volSlider.addEventListener('input', () => {
+    audio.volume = volSlider.value;
+    audio.muted = false;
+  });
+
+  volIcon.addEventListener('click', () => {
+    if (audio.muted || audio.volume === 0) {
+      audio.muted = false;
+      audio.volume = lastVolume || 0.8;
+      volSlider.value = audio.volume;
+    } else {
+      lastVolume = audio.volume;
+      audio.muted = true;
+      volSlider.value = 0;
+    }
+  });
+</script>
+
+</body>
+</html>
